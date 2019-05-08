@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from typing import List
 
-from finstmt import BalanceSheet
+from .finstmt import BalanceSheet
 
 @dataclass
 class FinancialInstitution(ABC):
@@ -21,3 +21,4 @@ class Bank(FinancialInstitution):
     
     def generate_balancesheet(self):
         print('generate balance sheet')
+
