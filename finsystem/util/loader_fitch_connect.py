@@ -8,16 +8,17 @@ from finsystem.entity.finstmt import BalanceSheet
 from finsystem.entity.fininst import Bank
 from finsystem.logger import get_logger
 
+log = get_logger('util')
 
 def load_raw_file(fc_data, fc_mapping):
     """
-    fc_data format should be Excel. fc_mapping contains fitch connect codes.
+    fc_data format should be tab seperated txt file. fc_mapping contains fitch connect codes.
     
     """
     
-    fmap = dict(map(lambda y: (y[1],y[0]), [x.rstrip().split(',') for x in open(mapping_file,'r')]))
-    fdf = pd.read_excel(sample_file)
-    
+    fmap = dict(map(lambda y: (y[1],y[0]), [x.rstrip().split(',') for x in open(fc_mapping,'r')]))
+    fdf = pd.read_csv(fc_data, sep='\t')
+    fdf.Period_Date = pd.to_datetime(fdf.Period_Date)
     return fmap, fdf
 
 
@@ -37,7 +38,7 @@ def generate_institution_class(fmap, fdf):
 
         for _val in [_name,_country,_lei,_bic]:
             if len(_val) > 1: 
-                logger.error('more than two values per one fitch id {0}'.format(_val.to_string()))
+                log.error('more than two values per one fitch id {0}'.format(_val.to_string()))
 
         bank = Bank(_name.iloc[0], _country.iloc[0])
         if type(_lei.iloc[0]) == str: 
