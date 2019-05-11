@@ -22,13 +22,19 @@ def load_raw_file(fc_data, fc_mapping):
     return fmap, fdf
 
 
-def generate_institution_class(fmap, fdf):
+def generate_institution_class(fmap, fdf, maxrow=None):
     default_col = ['Fitch_Entity_Id','Issuer_Name','Fitch_Country_Code','Agent_LEI','Swift_BIC','Period_Type','Period_Date']
-    fcol = [fmap[x.metadata.get('fitchcode')] for x in fields(BalanceSheet) if x.metadata.get('fitchcode') is not None]   
-    fdf_sel = fdf.loc[:, default_col+fcol]
+    #fcol = [fmap[x.metadata.get('fitchcode')] for x in fields(BalanceSheet) if x.metadata.get('fitchcode') is not None]
+    fcol = dict()
+    for _field in fields(BalanceSheet):
+        if _field.metadata.get('fitchcode') is None:
+            continue
+        else:
+            fcol[_field.name] = fmap[_field.metadata.get('fitchcode')]
+    fdf_sel = fdf.loc[:, default_col+list(fcol.values())]
 
     banks = list()
-    for fitch_id in fdf_sel.Fitch_Entity_Id.drop_duplicates():
+    for i, fitch_id in enumerate(fdf_sel.Fitch_Entity_Id.drop_duplicates()):
         # Extract one instituion about annual data
         df = fdf_sel[(fdf_sel.Fitch_Entity_Id == fitch_id) & (fdf_sel.Period_Type == 0)] 
         _name = df.Issuer_Name.drop_duplicates()
@@ -49,12 +55,16 @@ def generate_institution_class(fmap, fdf):
         balancesheets = list()
         for rindex in df.index:
             balancesheet = BalanceSheet('Y', df.loc[rindex]['Period_Date'].strftime('%Y%m%d'))
-            vals = {'asst_total_asset': df.loc[rindex]['Total_Assets'],
-                   'liab_total_liabilities': df.loc[rindex]['Total_Liabilities_excl_Pref_Shares_and_Hybrid_Capital_accounted_for_as_Debt'],
-                   'equt_total_equity': df.loc[rindex]['Total_Equity_excluding_Pref_Shares_and_Hybrid_Capital_accounted_for_as_Equity']}
+            vals = dict()
+            for _key in fcol:
+                vals[_key] = df.loc[rindex][fcol[_key]]
+            # vals = {'asst_total_asset': df.loc[rindex]['Total_Assets'],
+            #        'liab_total_liabilities': df.loc[rindex]['Total_Liabilities_excl_Pref_Shares_and_Hybrid_Capital_accounted_for_as_Debt'],
+            #        'equt_total_equity': df.loc[rindex]['Total_Equity_excluding_Pref_Shares_and_Hybrid_Capital_accounted_for_as_Equity']}
             balancesheet.assign_values(vals) 
             balancesheets.append(balancesheet)
-
+        if (maxrow is not None) and (i == maxrow):
+            break
         bank.balance_sheet = balancesheets
         banks.append(bank)
         
