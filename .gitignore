@@ -2,3 +2,7 @@
 *.log
 *.pyc
 *.ipynb
+*.bz2
+*.pickle
+*.json
+env/

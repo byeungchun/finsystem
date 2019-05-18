@@ -22,8 +22,8 @@ def load_raw_file(fc_data, fc_mapping):
     return fmap, fdf
 
 
-def generate_institution_class(fmap, fdf, maxrow=None):
-    default_col = ['Fitch_Entity_Id','Issuer_Name','Fitch_Country_Code','Agent_LEI','Swift_BIC','Period_Type','Period_Date']
+def create_bank(fmap, fdf, maxrow=None):
+    default_col = ['Fitch_Entity_Id','Issuer_Name','Fitch_Country_Code','Agent_LEI','Swift_BIC','Period_Type','Period_Date','Market_Sector_Description']
     #fcol = [fmap[x.metadata.get('fitchcode')] for x in fields(BalanceSheet) if x.metadata.get('fitchcode') is not None]
     fcol = dict()
     for _field in fields(BalanceSheet):
@@ -37,16 +37,18 @@ def generate_institution_class(fmap, fdf, maxrow=None):
     for i, fitch_id in enumerate(fdf_sel.Fitch_Entity_Id.drop_duplicates()):
         # Extract one instituion about annual data
         df = fdf_sel[(fdf_sel.Fitch_Entity_Id == fitch_id) & (fdf_sel.Period_Type == 0)] 
+        # If it is bigger than one row, it is error
         _name = df.Issuer_Name.drop_duplicates()
         _country = df.Fitch_Country_Code.drop_duplicates()
         _lei = df.Agent_LEI.drop_duplicates()
         _bic = df.Swift_BIC.drop_duplicates()
+        _mkt_sec = df.Market_Sector_Description.drop_duplicates()
 
-        for _val in [_name,_country,_lei,_bic]:
+        for _val in [_name,_country,_lei,_bic,_mkt_sec]:
             if len(_val) > 1: 
                 log.error('more than two values per one fitch id {0}'.format(_val.to_string()))
 
-        bank = Bank(_name.iloc[0], _country.iloc[0])
+        bank = Bank(_name.iloc[0], _country.iloc[0], _mkt_sec.iloc[0])
         if type(_lei.iloc[0]) == str: 
             bank.lei = _lei.iloc[0]
         if type(_bic.iloc[0]) == str:
