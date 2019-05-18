@@ -5,6 +5,9 @@ __all__ = ['mkt_sector_val','mkt_sector_key']
 mkt_sector ={'UCB':'Universal Commercial Banks'}
 
 def mkt_sector_val(_key):
+    """
+    Return market sector description
+    """
     return mkt_sector.get(_key)
 
 def mkt_sector_key(_val):
