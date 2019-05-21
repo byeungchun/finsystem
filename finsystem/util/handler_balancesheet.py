@@ -8,5 +8,16 @@ from finsystem.entity.fininst import BalanceSheet
 pickle_file = r'e:/workspace/finsystem/banks.pickle.bz2'
 
 def get_totalasset_by_country():
+    """
+    Return value is easily able to convert to Pandas dataframe 
+    ex. pd.DataFrame(lst_bs)
+    """
     banks = load_banks_pickle(pickle_file)
-    return banks
+    lst_bs = list()
+    for _bank in banks:
+        for _bs in _bank.balance_sheet:
+            _val = _bs.__dict__.copy()
+            for _key in ['issuer_name','fitch_id','country_code','mkt_sec']:
+                _val[_key] = _bank.__dict__[_key]
+            lst_bs.append(_val)
+    return lst_bs

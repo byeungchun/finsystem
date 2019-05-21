@@ -9,8 +9,9 @@ from .mapping import *
 class FinancialInstitution(ABC):
     issuer_name: str
     country_code: str
+    fitch_id: str = field(init=False, default=None)
     lei: str = field(init=False, default=None)
-    mkt_sec: str 
+    mkt_sec: str = field(init=False, default=None)
     balance_sheet: List[BalanceSheet] = field(repr=False, init=False)
     
     @abstractmethod

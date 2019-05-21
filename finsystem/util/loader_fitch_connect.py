@@ -38,6 +38,7 @@ def create_bank(fmap, fdf, maxrow=None):
         # Extract one instituion about annual data
         df = fdf_sel[(fdf_sel.Fitch_Entity_Id == fitch_id) & (fdf_sel.Period_Type == 0)] 
         # If it is bigger than one row, it is error
+        _fitch_id = df.Fitch_Entity_Id.drop_duplicates()
         _name = df.Issuer_Name.drop_duplicates()
         _country = df.Fitch_Country_Code.drop_duplicates()
         _lei = df.Agent_LEI.drop_duplicates()
@@ -48,7 +49,9 @@ def create_bank(fmap, fdf, maxrow=None):
             if len(_val) > 1: 
                 log.error('more than two values per one fitch id {0}'.format(_val.to_string()))
 
-        bank = Bank(_name.iloc[0], _country.iloc[0], _mkt_sec.iloc[0])
+        bank = Bank(_name.iloc[0], _country.iloc[0])
+        bank.mkt_sec = _mkt_sec.iloc[0]
+        bank.fitch_id = _fitch_id.iloc[0]
         if type(_lei.iloc[0]) == str: 
             bank.lei = _lei.iloc[0]
         if type(_bic.iloc[0]) == str:
