@@ -6,3 +6,4 @@
 *.pickle
 *.json
 env/
+data/

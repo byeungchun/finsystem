@@ -14,6 +14,12 @@ def load_raw_file(fc_data, fc_mapping):
     """
     fc_data format should be tab seperated txt file. fc_mapping contains fitch connect codes.
     
+    Arguments:
+        fc_data {[type]} -- [description]
+        fc_mapping {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
     """
     
     fmap = dict(map(lambda y: (y[1],y[0]), [x.rstrip().split(',') for x in open(fc_mapping,'r')]))
@@ -23,6 +29,18 @@ def load_raw_file(fc_data, fc_mapping):
 
 
 def create_bank(fmap, fdf, maxrow=None):
+    """[summary]
+    
+    Arguments:
+        fmap {[type]} -- [description]
+        fdf {[type]} -- [description]
+    
+    Keyword Arguments:
+        maxrow {[type]} -- [description] (default: {None})
+    
+    Returns:
+        [type] -- [description]
+    """
     default_col = ['Fitch_Entity_Id','Issuer_Name','Fitch_Country_Code','Agent_LEI','Swift_BIC','Period_Type','Period_Date','Market_Sector_Description']
     #fcol = [fmap[x.metadata.get('fitchcode')] for x in fields(BalanceSheet) if x.metadata.get('fitchcode') is not None]
     fcol = dict()
@@ -35,7 +53,7 @@ def create_bank(fmap, fdf, maxrow=None):
 
     banks = list()
     for i, fitch_id in enumerate(fdf_sel.Fitch_Entity_Id.drop_duplicates()):
-        # Extract one instituion about annual data
+        # Extract annual data rows for this institution
         df = fdf_sel[(fdf_sel.Fitch_Entity_Id == fitch_id) & (fdf_sel.Period_Type == 0)] 
         # If it is bigger than one row, it is error
         _fitch_id = df.Fitch_Entity_Id.drop_duplicates()
