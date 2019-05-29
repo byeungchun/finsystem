@@ -36,6 +36,11 @@ def dump_banks_to_pickle(banks=None):
     return pickle_file
 
 def load_banks_pickle():
+    """[summary]
+    
+    Returns:
+        [type] -- [description]
+    """
     pickle_file = os.path.join(file_folder, bank_pickle_file)
     banks = pickle.load(bz2.BZ2File(pickle_file,'r'))
     return banks
